@@ -23,6 +23,18 @@ The objective is to compare:
 - Optional comparison layer: `Dapper`
 - `Docker Compose` for DB environments
 
+## Running Databases with Docker
+
+Start database containers:
+
+`docker compose up -d`
+
+Stop database containers:
+
+`docker compose down`
+
+The default setup is defined in `docker-compose.yml` and includes `SQL Server`, `PostgreSQL`, `MySQL`, and `SQLite`.
+
 ## Planned Data Model (Unified Across DBMS)
 
 Main entities:

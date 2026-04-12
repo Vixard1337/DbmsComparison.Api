@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: dbmscomparison-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Pass123"
+    ports:
+      - "1433:1433"
+
+  postgres:
+    image: postgres:16
+    container_name: dbmscomparison-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: benchmarkdb
+    ports:
+      - "5432:5432"
+
+  mysql:
+    image: mysql:8
+    container_name: dbmscomparison-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: benchmarkdb
+    ports:
+      - "3306:3306"
+
+  sqlite:
+    image: nouchka/sqlite3
+    container_name: dbmscomparison-sqlite
+    stdin_open: true
+    tty: true
