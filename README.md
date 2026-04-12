@@ -61,6 +61,19 @@ Model requirements include:
 - **S2 (Medium/High load)**: 100,000 records, multiple users
 - **S3 (Stability)**: repeated runs for variance analysis
 
+## Experiment Protocol
+
+- Use the same hardware and `.NET` runtime version for all test runs.
+- Keep one unified data model across all DBMS providers.
+- Warm-up: 2 preliminary runs before measurement.
+- Measurement repetitions:
+  - `S1`: `N = 5`
+  - `S2`: `N = 5`
+  - `S3`: `N = 10`
+- Use identical input datasets for each DBMS.
+- Keep containers running under the same Docker configuration.
+- Acceptance criterion for repeatability: standard deviation `<= 10%`.
+
 ## Metrics
 
 - `time_ms`
