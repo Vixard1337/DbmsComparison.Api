@@ -1,0 +1,6 @@
+@DbmsComparison.Api_HostAddress = http://localhost:5161
+
+GET {{DbmsComparison.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
