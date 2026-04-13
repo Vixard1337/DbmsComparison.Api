@@ -33,7 +33,26 @@ Stop database containers:
 
 `docker compose down`
 
+Check running containers:
+
+`docker compose ps`
+
 The default setup is defined in `docker-compose.yml` and includes `SQL Server`, `PostgreSQL`, `MySQL`, and `SQLite`.
+
+## Database Connectivity Endpoint
+
+The API includes a connectivity endpoint for containerized databases:
+
+`GET /api/database/test?db=sqlserver`
+
+Supported values for `db`:
+
+- `sqlserver`
+- `postgres`
+- `mysql`
+- `sqlite`
+
+This endpoint returns provider info and whether the API can connect to the selected DBMS.
 
 ## Planned Data Model (Unified Across DBMS)
 
