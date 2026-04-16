@@ -23,6 +23,66 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Email).HasMaxLength(320).IsRequired();
+            entity.HasIndex(x => x.Email).IsUnique();
+            entity.Property(x => x.CreatedAt).IsRequired();
+            entity.Property(x => x.ProfileImage).IsRequired(false);
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.Property(x => x.CreatedAt).IsRequired();
+            entity.Property(x => x.Duration).IsRequired();
+            entity.Property(x => x.TotalAmount).HasPrecision(18, 2);
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.Property(x => x.Quantity).IsRequired();
+            entity.Property(x => x.UnitPrice).HasPrecision(18, 2);
+        });
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Price).HasPrecision(18, 2);
+            entity.Property(x => x.Metadata).IsRequired();
+        });
+
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        });
+
+        modelBuilder.Entity<Location>(entity =>
+        {
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Latitude).IsRequired();
+            entity.Property(x => x.Longitude).IsRequired();
+        });
+
+        var providerName = Database.ProviderName;
+        if (providerName is not null)
+        {
+            var metadataProperty = modelBuilder.Entity<Product>().Property(x => x.Metadata);
+
+            if (providerName.Contains("Npgsql", StringComparison.OrdinalIgnoreCase))
+            {
+                metadataProperty.HasColumnType("jsonb");
+            }
+            else if (providerName.Contains("MySql", StringComparison.OrdinalIgnoreCase))
+            {
+                metadataProperty.HasColumnType("json");
+            }
+            else if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+            {
+                metadataProperty.HasColumnType("TEXT");
+            }
+        }
+
         modelBuilder.Entity<ProductCategory>()
             .HasKey(x => new { x.ProductId, x.CategoryId });
 
