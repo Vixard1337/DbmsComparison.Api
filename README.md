@@ -54,6 +54,21 @@ Supported values for `db`:
 
 This endpoint returns provider info and whether the API can connect to the selected DBMS.
 
+## EF Core Tooling and Migration Strategy
+
+This repository uses a local tool manifest with `dotnet-ef` and `Microsoft.EntityFrameworkCore.Design` for migration workflows.
+
+Run EF Core tooling via:
+
+`dotnet dotnet-ef`
+
+Planned provider-specific migration layout:
+
+- `Migrations/SqlServer`
+- `Migrations/PostgreSql`
+- `Migrations/MySql`
+- `Migrations/Sqlite`
+
 ## Planned Data Model (Unified Across DBMS)
 
 Main entities:
