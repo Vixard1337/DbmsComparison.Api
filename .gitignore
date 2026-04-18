@@ -21,3 +21,6 @@ TestResults/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Local SQLite file
+benchmark.db
