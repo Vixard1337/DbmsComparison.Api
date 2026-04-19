@@ -8,6 +8,18 @@ namespace DbmsComparison.Api.Controllers;
 [Route("api/[controller]")]
 public class DatabaseController(IConfiguration configuration) : ControllerBase
 {
+    [HttpGet("providers")]
+    public IActionResult Providers()
+    {
+        var defaultProvider = configuration["Database:DefaultProvider"] ?? "sqlserver";
+
+        return Ok(new
+        {
+            defaultProvider,
+            supported = new[] { "sqlserver", "postgres", "mysql", "sqlite" }
+        });
+    }
+
     [HttpGet("test")]
     public async Task<IActionResult> Test([FromQuery] string db = "sqlserver")
     {
