@@ -1,4 +1,5 @@
 using DbmsComparison.Api.Data;
+using DbmsComparison.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +7,7 @@ namespace DbmsComparison.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DatabaseController(IConfiguration configuration) : ControllerBase
+public class DatabaseController(IConfiguration configuration, DataSeeder dataSeeder) : ControllerBase
 {
     [HttpGet("providers")]
     public IActionResult Providers()
@@ -42,6 +43,50 @@ public class DatabaseController(IConfiguration configuration) : ControllerBase
             db,
             provider = context.Database.ProviderName,
             canConnect
+        });
+    }
+
+    [HttpPost("seed")]
+    public async Task<IActionResult> Seed([FromQuery] string db = "sqlserver", CancellationToken cancellationToken = default)
+    {
+        if (!DbContextOptionsFactory.TryParse(db, out var parsedProvider))
+        {
+            return BadRequest(new
+            {
+                message = "Unsupported db value. Use: sqlserver, postgres, mysql, sqlite."
+            });
+        }
+
+        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+        DbContextOptionsFactory.ConfigureProvider(optionsBuilder, configuration, parsedProvider);
+
+        await using var context = new AppDbContext(optionsBuilder.Options);
+
+        if (!await context.Database.CanConnectAsync(cancellationToken))
+        {
+            return BadRequest(new
+            {
+                db,
+                message = "Cannot connect to database. Ensure migrations are applied before seeding."
+            });
+        }
+
+        var seedResult = await dataSeeder.SeedAsync(context, cancellationToken);
+
+        return Ok(new
+        {
+            db,
+            provider = context.Database.ProviderName,
+            seedResult.AddedTotal,
+            seedResult.Users,
+            seedResult.Categories,
+            seedResult.Products,
+            seedResult.ProductCategories,
+            seedResult.Orders,
+            seedResult.OrderItems,
+            seedResult.Locations,
+            seedResult.Skipped,
+            seedResult.Message
         });
     }
 }

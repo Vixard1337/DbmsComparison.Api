@@ -45,6 +45,10 @@ The API includes a connectivity endpoint for containerized databases:
 
 `GET /api/database/test?db=sqlserver`
 
+Seed sample test data:
+
+`POST /api/database/seed?db=sqlserver`
+
 Quick provider list endpoint:
 
 `GET /api/database/providers`
