@@ -62,6 +62,14 @@ Supported values for `db`:
 
 This endpoint returns provider info and whether the API can connect to the selected DBMS.
 
+Basic `Users` CRUD endpoints are available:
+
+- `GET /api/users?db=sqlserver`
+- `GET /api/users/{id}?db=sqlserver`
+- `POST /api/users?db=sqlserver`
+- `PUT /api/users/{id}?db=sqlserver`
+- `DELETE /api/users/{id}?db=sqlserver`
+
 ## EF Core Tooling and Migration Strategy
 
 This repository uses a local tool manifest with `dotnet-ef` and `Microsoft.EntityFrameworkCore.Design` for migration workflows.
