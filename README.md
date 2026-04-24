@@ -70,6 +70,14 @@ Basic `Users` CRUD endpoints are available:
 - `PUT /api/users/{id}?db=sqlserver`
 - `DELETE /api/users/{id}?db=sqlserver`
 
+Basic `Products` CRUD endpoints are available:
+
+- `GET /api/products?db=sqlserver`
+- `GET /api/products/{id}?db=sqlserver`
+- `POST /api/products?db=sqlserver`
+- `PUT /api/products/{id}?db=sqlserver`
+- `DELETE /api/products/{id}?db=sqlserver`
+
 ## EF Core Tooling and Migration Strategy
 
 This repository uses a local tool manifest with `dotnet-ef` and `Microsoft.EntityFrameworkCore.Design` for migration workflows.
