@@ -78,6 +78,20 @@ Basic `Products` CRUD endpoints are available:
 - `PUT /api/products/{id}?db=sqlserver`
 - `DELETE /api/products/{id}?db=sqlserver`
 
+Basic `Orders` endpoints are available:
+
+- `GET /api/orders?db=sqlserver`
+- `GET /api/orders/{id}?db=sqlserver`
+- `POST /api/orders?db=sqlserver`
+- `DELETE /api/orders/{id}?db=sqlserver`
+
+`POST /api/orders` validates:
+
+- `UserId` exists
+- every `ProductId` exists
+- each `Quantity > 0`
+- `TotalAmount` is calculated from `OrderItems` (server-side)
+
 ## EF Core Tooling and Migration Strategy
 
 This repository uses a local tool manifest with `dotnet-ef` and `Microsoft.EntityFrameworkCore.Design` for migration workflows.
