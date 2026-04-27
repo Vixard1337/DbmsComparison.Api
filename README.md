@@ -96,6 +96,13 @@ Basic `Orders` endpoints are available:
 - each `Quantity > 0`
 - `TotalAmount` is calculated from `OrderItems` (server-side)
 
+Basic `Categories` endpoints are available:
+
+- `GET /api/categories?db=sqlserver`
+- `POST /api/categories?db=sqlserver`
+
+`POST /api/categories` supports hierarchy via optional `ParentCategoryId`.
+
 ## EF Core Tooling and Migration Strategy
 
 This repository uses a local tool manifest with `dotnet-ef` and `Microsoft.EntityFrameworkCore.Design` for migration workflows.
