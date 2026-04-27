@@ -89,4 +89,52 @@ public class DatabaseController(IConfiguration configuration, DataSeeder dataSee
             seedResult.Message
         });
     }
+
+    [HttpGet("seed/status")]
+    public async Task<IActionResult> SeedStatus([FromQuery] string db = "sqlserver", CancellationToken cancellationToken = default)
+    {
+        if (!DbContextOptionsFactory.TryParse(db, out var parsedProvider))
+        {
+            return BadRequest(new
+            {
+                message = "Unsupported db value. Use: sqlserver, postgres, mysql, sqlite."
+            });
+        }
+
+        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+        DbContextOptionsFactory.ConfigureProvider(optionsBuilder, configuration, parsedProvider);
+
+        await using var context = new AppDbContext(optionsBuilder.Options);
+
+        if (!await context.Database.CanConnectAsync(cancellationToken))
+        {
+            return BadRequest(new
+            {
+                db,
+                message = "Cannot connect to database. Ensure database is available."
+            });
+        }
+
+        var users = await context.Users.CountAsync(cancellationToken);
+        var categories = await context.Categories.CountAsync(cancellationToken);
+        var products = await context.Products.CountAsync(cancellationToken);
+        var productCategories = await context.ProductCategories.CountAsync(cancellationToken);
+        var orders = await context.Orders.CountAsync(cancellationToken);
+        var orderItems = await context.OrderItems.CountAsync(cancellationToken);
+        var locations = await context.Locations.CountAsync(cancellationToken);
+
+        return Ok(new
+        {
+            db,
+            provider = context.Database.ProviderName,
+            Users = users,
+            Categories = categories,
+            Products = products,
+            ProductCategories = productCategories,
+            Orders = orders,
+            OrderItems = orderItems,
+            Locations = locations,
+            Total = users + categories + products + productCategories + orders + orderItems + locations
+        });
+    }
 }

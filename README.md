@@ -49,6 +49,10 @@ Seed sample test data:
 
 `POST /api/database/seed?db=sqlserver`
 
+Check seeded data counts:
+
+`GET /api/database/seed/status?db=sqlserver`
+
 Quick provider list endpoint:
 
 `GET /api/database/providers`
