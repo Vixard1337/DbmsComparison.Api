@@ -87,6 +87,7 @@ Basic `Orders` endpoints are available:
 - `GET /api/orders?db=sqlserver`
 - `GET /api/orders/{id}?db=sqlserver`
 - `POST /api/orders?db=sqlserver`
+- `PUT /api/orders/{id}?db=sqlserver`
 - `DELETE /api/orders/{id}?db=sqlserver`
 
 `POST /api/orders` validates:

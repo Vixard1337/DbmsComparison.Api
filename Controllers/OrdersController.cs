@@ -163,6 +163,84 @@ public class OrdersController(IConfiguration configuration) : ControllerBase
         }
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateOrderRequest request, [FromQuery] string db = "sqlserver", CancellationToken cancellationToken = default)
+    {
+        var validationError = ValidateUpdateRequest(request);
+        if (validationError is not null)
+        {
+            return BadRequest(new { message = validationError });
+        }
+
+        if (!TryCreateContext(db, out var context, out var errorResult))
+        {
+            return errorResult!;
+        }
+
+        await using (context)
+        {
+            var order = await context.Orders
+                .Include(x => x.OrderItems)
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (order is null)
+            {
+                return NotFound();
+            }
+
+            var requestedProductIds = request.Items.Select(x => x.ProductId).Distinct().ToList();
+            var products = await context.Products
+                .Where(x => requestedProductIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id, cancellationToken);
+
+            if (products.Count != requestedProductIds.Count)
+            {
+                return BadRequest(new { message = "One or more ProductId values do not exist." });
+            }
+
+            context.OrderItems.RemoveRange(order.OrderItems);
+            
+            var newOrderItems = new List<OrderItem>();
+            decimal totalAmount = 0m;
+
+            foreach (var item in request.Items)
+            {
+                var product = products[item.ProductId];
+                totalAmount += product.Price * item.Quantity;
+
+                newOrderItems.Add(new OrderItem
+                {
+                    OrderId = order.Id,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    UnitPrice = product.Price
+                });
+            }
+
+            order.OrderItems = newOrderItems;
+            order.Duration = TimeSpan.FromMinutes(request.DurationMinutes);
+            order.TotalAmount = totalAmount;
+
+            await context.SaveChangesAsync(cancellationToken);
+
+            return Ok(new
+            {
+                order.Id,
+                order.UserId,
+                order.CreatedAt,
+                order.Duration,
+                order.TotalAmount,
+                Items = order.OrderItems.Select(i => new
+                {
+                    i.Id,
+                    i.ProductId,
+                    i.Quantity,
+                    i.UnitPrice
+                })
+            });
+        }
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, [FromQuery] string db = "sqlserver", CancellationToken cancellationToken = default)
     {
@@ -234,7 +312,34 @@ public class OrdersController(IConfiguration configuration) : ControllerBase
         return null;
     }
 
+    private static string? ValidateUpdateRequest(UpdateOrderRequest request)
+    {
+        if (request.DurationMinutes <= 0)
+        {
+            return "DurationMinutes must be greater than 0.";
+        }
+
+        if (request.Items is null || request.Items.Count == 0)
+        {
+            return "At least one order item is required.";
+        }
+
+        if (request.Items.Any(x => x.ProductId <= 0))
+        {
+            return "Each item must contain valid ProductId.";
+        }
+
+        if (request.Items.Any(x => x.Quantity <= 0))
+        {
+            return "Each item must have Quantity greater than 0.";
+        }
+
+        return null;
+    }
+
     public sealed record CreateOrderItemRequest(int ProductId, int Quantity);
 
     public sealed record CreateOrderRequest(int UserId, int DurationMinutes, List<CreateOrderItemRequest> Items);
+
+    public sealed record UpdateOrderRequest(int DurationMinutes, List<CreateOrderItemRequest> Items);
 }
