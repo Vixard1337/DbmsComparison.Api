@@ -82,6 +82,11 @@ Basic `Products` CRUD endpoints are available:
 - `PUT /api/products/{id}?db=sqlserver`
 - `DELETE /api/products/{id}?db=sqlserver`
 
+Product-category assignment endpoints:
+
+- `POST /api/products/{productId}/categories/{categoryId}?db=sqlserver`
+- `DELETE /api/products/{productId}/categories/{categoryId}?db=sqlserver`
+
 Basic `Orders` endpoints are available:
 
 - `GET /api/orders?db=sqlserver`

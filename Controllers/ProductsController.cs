@@ -159,6 +159,77 @@ public class ProductsController(IConfiguration configuration) : ControllerBase
         }
     }
 
+    [HttpPost("{productId:int}/categories/{categoryId:int}")]
+    public async Task<IActionResult> AddCategory(int productId, int categoryId, [FromQuery] string db = "sqlserver", CancellationToken cancellationToken = default)
+    {
+        if (!TryCreateContext(db, out var context, out var errorResult))
+        {
+            return errorResult!;
+        }
+
+        await using (context)
+        {
+            var productExists = await context.Products.AnyAsync(x => x.Id == productId, cancellationToken);
+            if (!productExists)
+            {
+                return NotFound(new { message = "Product not found." });
+            }
+
+            var categoryExists = await context.Categories.AnyAsync(x => x.Id == categoryId, cancellationToken);
+            if (!categoryExists)
+            {
+                return NotFound(new { message = "Category not found." });
+            }
+
+            var alreadyLinked = await context.ProductCategories
+                .AnyAsync(x => x.ProductId == productId && x.CategoryId == categoryId, cancellationToken);
+
+            if (alreadyLinked)
+            {
+                return Conflict(new { message = "Product is already linked to the category." });
+            }
+
+            context.ProductCategories.Add(new ProductCategory
+            {
+                ProductId = productId,
+                CategoryId = categoryId
+            });
+
+            await context.SaveChangesAsync(cancellationToken);
+
+            return Ok(new
+            {
+                ProductId = productId,
+                CategoryId = categoryId
+            });
+        }
+    }
+
+    [HttpDelete("{productId:int}/categories/{categoryId:int}")]
+    public async Task<IActionResult> RemoveCategory(int productId, int categoryId, [FromQuery] string db = "sqlserver", CancellationToken cancellationToken = default)
+    {
+        if (!TryCreateContext(db, out var context, out var errorResult))
+        {
+            return errorResult!;
+        }
+
+        await using (context)
+        {
+            var link = await context.ProductCategories
+                .FirstOrDefaultAsync(x => x.ProductId == productId && x.CategoryId == categoryId, cancellationToken);
+
+            if (link is null)
+            {
+                return NotFound(new { message = "Product-category link not found." });
+            }
+
+            context.ProductCategories.Remove(link);
+            await context.SaveChangesAsync(cancellationToken);
+
+            return NoContent();
+        }
+    }
+
     private bool TryCreateContext(string db, out AppDbContext? context, out IActionResult? errorResult)
     {
         context = null;
