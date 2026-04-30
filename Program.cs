@@ -10,6 +10,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<DataSeeder>();
+builder.Services.AddScoped<BenchmarkRunner>();
 
 var defaultProviderName = builder.Configuration["Database:DefaultProvider"];
 if (!DbContextOptionsFactory.TryParse(defaultProviderName, out var defaultProvider))

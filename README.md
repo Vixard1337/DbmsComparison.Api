@@ -66,6 +66,14 @@ Supported values for `db`:
 
 This endpoint returns provider info and whether the API can connect to the selected DBMS.
 
+Benchmark runner endpoint:
+
+`POST /api/benchmark/run?db=sqlserver&scenario=S1`
+
+Optional override rows parameter:
+
+`POST /api/benchmark/run?db=sqlserver&scenario=S1&rows=1000`
+
 Basic `Users` CRUD endpoints are available:
 
 - `GET /api/users?db=sqlserver`
