@@ -74,6 +74,8 @@ Optional override rows parameter:
 
 `POST /api/benchmark/run?db=sqlserver&scenario=S1&rows=1000`
 
+Benchmark v1 runs CRUD for `Users` and `Products`.
+
 Basic `Users` CRUD endpoints are available:
 
 - `GET /api/users?db=sqlserver`

@@ -26,7 +26,17 @@ public class BenchmarkRunner
             })
             .ToList();
 
+        var products = Enumerable.Range(1, totalCount)
+            .Select(index => new Product
+            {
+                Name = $"Product {index}",
+                Price = 10m + index,
+                Metadata = "{\"category\":\"benchmark\",\"source\":\"runner\"}"
+            })
+            .ToList();
+
         context.Users.AddRange(users);
+        context.Products.AddRange(products);
         await context.SaveChangesAsync(cancellationToken);
 
         var readUsers = await context.Users
@@ -36,14 +46,27 @@ public class BenchmarkRunner
             .Take(totalCount)
             .ToListAsync(cancellationToken);
 
+        var readProducts = await context.Products
+            .AsNoTracking()
+            .Where(x => x.Metadata.Contains("\"benchmark\""))
+            .OrderBy(x => x.Id)
+            .Take(totalCount)
+            .ToListAsync(cancellationToken);
+
         foreach (var user in users)
         {
             user.Name = $"{user.Name} Updated";
         }
 
+        foreach (var product in products)
+        {
+            product.Price += 1m;
+        }
+
         await context.SaveChangesAsync(cancellationToken);
 
         context.Users.RemoveRange(users);
+        context.Products.RemoveRange(products);
         await context.SaveChangesAsync(cancellationToken);
 
         stopwatch.Stop();
@@ -52,7 +75,7 @@ public class BenchmarkRunner
         var cpuMs = (process.TotalProcessorTime - cpuStart).TotalMilliseconds;
         var ramMb = Math.Max(0, process.WorkingSet64 - memStart) / 1024d / 1024d;
         var timeMs = stopwatch.Elapsed.TotalMilliseconds;
-        var totalOps = totalCount * 4;
+        var totalOps = totalCount * 8;
         var tps = timeMs > 0 ? totalOps / (timeMs / 1000d) : 0d;
 
         return new BenchmarkResult(
@@ -63,7 +86,7 @@ public class BenchmarkRunner
             cpuMs,
             ramMb,
             tps,
-            readUsers.Count);
+            readUsers.Count + readProducts.Count);
     }
 
     public async Task WriteResultAsync(BenchmarkResult result, string db, string providerName, CancellationToken cancellationToken = default)
