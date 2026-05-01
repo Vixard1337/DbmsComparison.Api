@@ -35,8 +35,45 @@ public class BenchmarkRunner
             })
             .ToList();
 
+        var orderItemsPerOrder = Math.Clamp(totalCount / 10, 1, 5);
+        var ordersToCreate = Math.Clamp(totalCount / 10, 1, totalCount);
+
         context.Users.AddRange(users);
         context.Products.AddRange(products);
+        await context.SaveChangesAsync(cancellationToken);
+
+        var orders = new List<Order>(ordersToCreate);
+        for (var i = 0; i < ordersToCreate; i++)
+        {
+            var user = users[i % users.Count];
+            var orderItems = new List<OrderItem>(orderItemsPerOrder);
+            decimal totalAmount = 0m;
+
+            for (var j = 0; j < orderItemsPerOrder; j++)
+            {
+                var product = products[(i + j) % products.Count];
+                var quantity = (j % 3) + 1;
+                totalAmount += product.Price * quantity;
+
+                orderItems.Add(new OrderItem
+                {
+                    ProductId = product.Id,
+                    Quantity = quantity,
+                    UnitPrice = product.Price
+                });
+            }
+
+            orders.Add(new Order
+            {
+                UserId = user.Id,
+                CreatedAt = DateTime.UtcNow,
+                Duration = TimeSpan.FromMinutes(5 + (i % 20)),
+                TotalAmount = totalAmount,
+                OrderItems = orderItems
+            });
+        }
+
+        context.Orders.AddRange(orders);
         await context.SaveChangesAsync(cancellationToken);
 
         var readUsers = await context.Users
@@ -53,6 +90,14 @@ public class BenchmarkRunner
             .Take(totalCount)
             .ToListAsync(cancellationToken);
 
+        var readOrders = await context.Orders
+            .AsNoTracking()
+            .Include(x => x.OrderItems)
+            .Where(x => x.CreatedAt >= orders.Min(o => o.CreatedAt))
+            .OrderBy(x => x.Id)
+            .Take(ordersToCreate)
+            .ToListAsync(cancellationToken);
+
         foreach (var user in users)
         {
             user.Name = $"{user.Name} Updated";
@@ -63,8 +108,16 @@ public class BenchmarkRunner
             product.Price += 1m;
         }
 
+        foreach (var order in orders)
+        {
+            order.Duration = order.Duration.Add(TimeSpan.FromMinutes(1));
+            order.TotalAmount = order.OrderItems.Sum(i => i.UnitPrice * i.Quantity);
+        }
+
         await context.SaveChangesAsync(cancellationToken);
 
+        context.OrderItems.RemoveRange(orders.SelectMany(o => o.OrderItems));
+        context.Orders.RemoveRange(orders);
         context.Users.RemoveRange(users);
         context.Products.RemoveRange(products);
         await context.SaveChangesAsync(cancellationToken);
@@ -75,7 +128,7 @@ public class BenchmarkRunner
         var cpuMs = (process.TotalProcessorTime - cpuStart).TotalMilliseconds;
         var ramMb = Math.Max(0, process.WorkingSet64 - memStart) / 1024d / 1024d;
         var timeMs = stopwatch.Elapsed.TotalMilliseconds;
-        var totalOps = totalCount * 8;
+        var totalOps = (totalCount * 8) + (ordersToCreate * 4);
         var tps = timeMs > 0 ? totalOps / (timeMs / 1000d) : 0d;
 
         return new BenchmarkResult(
@@ -86,7 +139,7 @@ public class BenchmarkRunner
             cpuMs,
             ramMb,
             tps,
-            readUsers.Count + readProducts.Count);
+            readUsers.Count + readProducts.Count + readOrders.Count);
     }
 
     public async Task WriteResultAsync(BenchmarkResult result, string db, string providerName, CancellationToken cancellationToken = default)
