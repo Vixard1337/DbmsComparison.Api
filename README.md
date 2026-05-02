@@ -184,6 +184,12 @@ Results format (CSV):
 
 `run_id,dbms,scenario,time_ms,cpu,ram,tps`
 
+## Analysis Script
+
+Analyze benchmark results and generate summary statistics + plots:
+
+`python analysis/analyze_results.py --input results/benchmark-results.csv`
+
 ## Repository Status
 
 Initial project setup. Full multi-database implementation, migrations, benchmarking, and analysis modules are in progress.
