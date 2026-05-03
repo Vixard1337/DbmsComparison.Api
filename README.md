@@ -66,6 +66,12 @@ Supported values for `db`:
 
 This endpoint returns provider info and whether the API can connect to the selected DBMS.
 
+## Swagger UI
+
+Swagger UI is available in development mode at:
+
+`https://localhost:7289/swagger`
+
 Benchmark runner endpoint:
 
 `POST /api/benchmark/run?db=sqlserver&scenario=S1`
