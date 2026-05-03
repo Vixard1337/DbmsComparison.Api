@@ -74,6 +74,10 @@ Optional override rows parameter:
 
 `POST /api/benchmark/run?db=sqlserver&scenario=S1&rows=1000`
 
+Batch runner for S1/S2/S3 with repetitions:
+
+`POST /api/benchmark/run-all?db=sqlserver&repetitions=5`
+
 Benchmark v1 runs CRUD for `Users`, `Products`, and `Orders` (with `OrderItems`).
 
 Basic `Users` CRUD endpoints are available:
@@ -189,6 +193,14 @@ Results format (CSV):
 Analyze benchmark results and generate summary statistics + plots:
 
 `python analysis/analyze_results.py --input results/benchmark-results.csv`
+
+Install analysis dependencies:
+
+`pip install -r analysis/requirements.txt`
+
+Run analysis with plots:
+
+`python analysis/analyze_results.py --input results/benchmark-results.csv --plots analysis/plots`
 
 ## Repository Status
 

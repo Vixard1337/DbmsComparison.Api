@@ -11,6 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddScoped<BenchmarkRunner>();
+builder.Services.AddScoped<BenchmarkBatchRunner>();
 
 var defaultProviderName = builder.Configuration["Database:DefaultProvider"];
 if (!DbContextOptionsFactory.TryParse(defaultProviderName, out var defaultProvider))
