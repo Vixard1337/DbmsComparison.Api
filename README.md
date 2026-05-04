@@ -68,7 +68,7 @@ This endpoint returns provider info and whether the API can connect to the selec
 
 ## Swagger UI
 
-Swagger UI is available in development mode at:
+Swagger UI (NSwag) is available in development mode at:
 
 `https://localhost:7289/swagger`
 
