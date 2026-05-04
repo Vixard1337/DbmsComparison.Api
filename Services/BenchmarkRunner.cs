@@ -147,7 +147,7 @@ public class BenchmarkRunner
         var directory = Path.Combine(AppContext.BaseDirectory, "results");
         Directory.CreateDirectory(directory);
 
-        var filePath = Path.Combine(directory, "benchmark-results.csv");
+        var filePath = Path.Combine(directory, $"benchmark-results-{db}-{result.Scenario}.csv");
         var isNewFile = !File.Exists(filePath);
 
         await using var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);

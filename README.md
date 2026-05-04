@@ -66,6 +66,28 @@ Supported values for `db`:
 
 This endpoint returns provider info and whether the API can connect to the selected DBMS.
 
+## Quick Start
+
+1. Start databases:
+
+`docker compose up -d`
+
+2. Run the API:
+
+`dotnet run`
+
+3. Open Swagger UI:
+
+`https://localhost:7289/swagger`
+
+4. Seed sample data:
+
+`POST /api/database/seed?db=sqlserver`
+
+5. Run a benchmark:
+
+`POST /api/benchmark/run?db=sqlserver&scenario=S1`
+
 ## Swagger UI
 
 Swagger UI (NSwag) is available in development mode at:
@@ -193,6 +215,10 @@ Model requirements include:
 Results format (CSV):
 
 `run_id,dbms,scenario,time_ms,cpu,ram,tps`
+
+Each run is stored in:
+
+`results/benchmark-results-{db}-{scenario}.csv`
 
 ## Analysis Script
 
