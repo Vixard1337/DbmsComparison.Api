@@ -88,6 +88,12 @@ This endpoint returns provider info and whether the API can connect to the selec
 
 `POST /api/benchmark/run?db=sqlserver&scenario=S1`
 
+## Tests
+
+Run integration tests:
+
+`dotnet test`
+
 ## Swagger UI
 
 Swagger UI (NSwag) is available in development mode at:

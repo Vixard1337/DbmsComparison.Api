@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="DbmsComparison.Api.Tests\DbmsComparison.Api.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="DbmsComparison.Api.Tests\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
