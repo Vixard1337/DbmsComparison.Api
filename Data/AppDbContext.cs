@@ -62,24 +62,30 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
             entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Latitude).IsRequired();
             entity.Property(x => x.Longitude).IsRequired();
+            entity.Property(x => x.GeoPoint).IsRequired(false);
+            entity.Property(x => x.GeoPointWkt).HasMaxLength(500).IsRequired(false);
         });
 
         var providerName = Database.ProviderName;
         if (providerName is not null)
         {
             var metadataProperty = modelBuilder.Entity<Product>().Property(x => x.Metadata);
+            var locationPointProperty = modelBuilder.Entity<Location>().Property(x => x.GeoPoint);
 
             if (providerName.Contains("Npgsql", StringComparison.OrdinalIgnoreCase))
             {
                 metadataProperty.HasColumnType("jsonb");
+                locationPointProperty.HasColumnType("geography (point)");
             }
             else if (providerName.Contains("MySql", StringComparison.OrdinalIgnoreCase))
             {
                 metadataProperty.HasColumnType("json");
+                locationPointProperty.HasColumnType("point");
             }
             else if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
             {
                 metadataProperty.HasColumnType("TEXT");
+                locationPointProperty.HasColumnType("TEXT");
             }
         }
 

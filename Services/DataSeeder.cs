@@ -1,6 +1,7 @@
 using DbmsComparison.Api.Data;
 using DbmsComparison.Api.Entities;
 using Microsoft.EntityFrameworkCore;
+using Point = NetTopologySuite.Geometries.Point;
 
 namespace DbmsComparison.Api.Services;
 
@@ -105,18 +106,22 @@ public class DataSeeder
         var productCategoryOne = new ProductCategory { Product = laptop, Category = childCategory };
         var productCategoryTwo = new ProductCategory { Product = mouse, Category = rootCategory };
 
-        var locationOne = new Location
+        var locationOne = new DbmsComparison.Api.Entities.Location
         {
             Name = "HQ",
             Latitude = 52.2297,
-            Longitude = 21.0122
+            Longitude = 21.0122,
+            GeoPoint = new Point(21.0122, 52.2297) { SRID = 4326 },
+            GeoPointWkt = "POINT (21.0122 52.2297)"
         };
 
-        var locationTwo = new Location
+        var locationTwo = new DbmsComparison.Api.Entities.Location
         {
             Name = "Branch Office",
             Latitude = 50.0647,
-            Longitude = 19.9450
+            Longitude = 19.9450,
+            GeoPoint = new Point(19.9450, 50.0647) { SRID = 4326 },
+            GeoPointWkt = "POINT (19.9450 50.0647)"
         };
 
         context.AddRange(rootCategory, childCategory);

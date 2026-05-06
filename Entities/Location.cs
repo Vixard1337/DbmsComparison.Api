@@ -1,3 +1,5 @@
+using NetTopologySuite.Geometries;
+
 namespace DbmsComparison.Api.Entities;
 
 public class Location
@@ -9,4 +11,8 @@ public class Location
     public double Latitude { get; set; }
 
     public double Longitude { get; set; }
+
+    public Point? GeoPoint { get; set; }
+
+    public string? GeoPointWkt { get; set; }
 }

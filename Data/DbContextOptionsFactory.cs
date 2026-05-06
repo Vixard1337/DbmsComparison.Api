@@ -9,14 +9,14 @@ public static class DbContextOptionsFactory
         switch (provider)
         {
             case DbmsProvider.SqlServer:
-                optionsBuilder.UseSqlServer(configuration.GetConnectionString("SqlServer"));
+                optionsBuilder.UseSqlServer(configuration.GetConnectionString("SqlServer"), sql => sql.UseNetTopologySuite());
                 break;
             case DbmsProvider.PostgreSql:
-                optionsBuilder.UseNpgsql(configuration.GetConnectionString("PostgreSql"));
+                optionsBuilder.UseNpgsql(configuration.GetConnectionString("PostgreSql"), npgsql => npgsql.UseNetTopologySuite());
                 break;
             case DbmsProvider.MySql:
                 var mySqlConnection = configuration.GetConnectionString("MySql");
-                optionsBuilder.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection));
+                optionsBuilder.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection), mySql => mySql.UseNetTopologySuite());
                 break;
             case DbmsProvider.Sqlite:
                 optionsBuilder.UseSqlite(configuration.GetConnectionString("Sqlite"));
