@@ -181,10 +181,10 @@ public class BenchmarkRunner
 
         return scenario switch
         {
-            BenchmarkScenario.S1 => 1000,
-            BenchmarkScenario.S2 => 10000,
-            BenchmarkScenario.S3 => 2000,
-            _ => 1000
+            BenchmarkScenario.S1 => 10000,
+            BenchmarkScenario.S2 => 100000,
+            BenchmarkScenario.S3 => 10000,
+            _ => 10000
         };
     }
 }

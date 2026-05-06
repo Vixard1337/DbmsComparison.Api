@@ -196,7 +196,7 @@ Model requirements include:
 
 - **S1 (Low load)**: 10,000 records, 1 user
 - **S2 (Medium/High load)**: 100,000 records, multiple users
-- **S3 (Stability)**: repeated runs for variance analysis
+- **S3 (Stability)**: 10,000 records, repeated runs for variance analysis
 
 ## Experiment Protocol
 
