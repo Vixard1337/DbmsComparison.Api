@@ -70,22 +70,34 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         if (providerName is not null)
         {
             var metadataProperty = modelBuilder.Entity<Product>().Property(x => x.Metadata);
-            var locationPointProperty = modelBuilder.Entity<Location>().Property(x => x.GeoPoint);
+            var locationEntity = modelBuilder.Entity<Location>();
 
             if (providerName.Contains("Npgsql", StringComparison.OrdinalIgnoreCase))
             {
                 metadataProperty.HasColumnType("jsonb");
-                locationPointProperty.HasColumnType("geography (point)");
+                locationEntity.Property(x => x.GeoPoint)
+                    .HasColumnType("geography (point)")
+                    .HasSrid(4326);
             }
             else if (providerName.Contains("MySql", StringComparison.OrdinalIgnoreCase))
             {
                 metadataProperty.HasColumnType("json");
-                locationPointProperty.HasColumnType("point");
+                locationEntity.Property(x => x.GeoPoint)
+                    .HasColumnType("point")
+                    .HasSrid(4326);
+            }
+            else if (providerName.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
+            {
+                metadataProperty.HasColumnType("nvarchar(max)");
+                locationEntity.Property(x => x.GeoPoint)
+                    .HasColumnType("geography")
+                    .HasSrid(4326);
             }
             else if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
             {
                 metadataProperty.HasColumnType("TEXT");
-                locationPointProperty.HasColumnType("TEXT");
+                locationEntity.Ignore(x => x.GeoPoint);
+                locationEntity.Property(x => x.GeoPointWkt).HasColumnType("TEXT");
             }
         }
 

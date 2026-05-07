@@ -128,6 +128,10 @@ public class BenchmarkRunner
         var cpuMs = (process.TotalProcessorTime - cpuStart).TotalMilliseconds;
         var ramMb = Math.Max(0, process.WorkingSet64 - memStart) / 1024d / 1024d;
         var timeMs = stopwatch.Elapsed.TotalMilliseconds;
+        var readOps = readUsers.Count + readProducts.Count + readOrders.Count;
+        var createOps = users.Count + products.Count + orders.Sum(o => o.OrderItems.Count);
+        var updateOps = users.Count + products.Count + orders.Count;
+        var deleteOps = users.Count + products.Count + orders.Count + orders.Sum(o => o.OrderItems.Count);
         var totalOps = (totalCount * 8) + (ordersToCreate * 4);
         var tps = timeMs > 0 ? totalOps / (timeMs / 1000d) : 0d;
 
@@ -139,7 +143,10 @@ public class BenchmarkRunner
             cpuMs,
             ramMb,
             tps,
-            readUsers.Count + readProducts.Count + readOrders.Count);
+            readOps,
+            createOps,
+            updateOps,
+            deleteOps);
     }
 
     public async Task WriteResultAsync(BenchmarkResult result, string db, string providerName, CancellationToken cancellationToken = default)
@@ -155,7 +162,7 @@ public class BenchmarkRunner
 
         if (isNewFile)
         {
-            await writer.WriteLineAsync("run_id,dbms,provider,scenario,rows,time_ms,cpu_ms,ram_mb,tps");
+            await writer.WriteLineAsync("run_id,dbms,provider,scenario,rows,time_ms,cpu_ms,ram_mb,tps,read_ops,create_ops,update_ops,delete_ops");
         }
 
         var line = string.Join(",",
@@ -167,7 +174,11 @@ public class BenchmarkRunner
             result.TimeMs.ToString("F2", CultureInfo.InvariantCulture),
             result.CpuMs.ToString("F2", CultureInfo.InvariantCulture),
             result.RamMb.ToString("F2", CultureInfo.InvariantCulture),
-            result.Tps.ToString("F2", CultureInfo.InvariantCulture));
+            result.Tps.ToString("F2", CultureInfo.InvariantCulture),
+            result.ReadOps.ToString(CultureInfo.InvariantCulture),
+            result.CreateOps.ToString(CultureInfo.InvariantCulture),
+            result.UpdateOps.ToString(CultureInfo.InvariantCulture),
+            result.DeleteOps.ToString(CultureInfo.InvariantCulture));
 
         await writer.WriteLineAsync(line);
     }
@@ -204,4 +215,7 @@ public sealed record BenchmarkResult(
     double CpuMs,
     double RamMb,
     double Tps,
-    int ReadCount);
+    int ReadOps,
+    int CreateOps,
+    int UpdateOps,
+    int DeleteOps);
