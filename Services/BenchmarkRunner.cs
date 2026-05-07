@@ -128,6 +128,10 @@ public class BenchmarkRunner
         var cpuMs = (process.TotalProcessorTime - cpuStart).TotalMilliseconds;
         var ramMb = Math.Max(0, process.WorkingSet64 - memStart) / 1024d / 1024d;
         var timeMs = stopwatch.Elapsed.TotalMilliseconds;
+        var maxRamMb = Math.Max(memStart, process.PeakWorkingSet64) / 1024d / 1024d;
+        var gen0Collections = GC.CollectionCount(0);
+        var gen1Collections = GC.CollectionCount(1);
+        var gen2Collections = GC.CollectionCount(2);
         var readOps = readUsers.Count + readProducts.Count + readOrders.Count;
         var createOps = users.Count + products.Count + orders.Sum(o => o.OrderItems.Count);
         var updateOps = users.Count + products.Count + orders.Count;
@@ -146,7 +150,11 @@ public class BenchmarkRunner
             readOps,
             createOps,
             updateOps,
-            deleteOps);
+            deleteOps,
+            maxRamMb,
+            gen0Collections,
+            gen1Collections,
+            gen2Collections);
     }
 
     public async Task WriteResultAsync(BenchmarkResult result, string db, string providerName, CancellationToken cancellationToken = default)
@@ -162,7 +170,7 @@ public class BenchmarkRunner
 
         if (isNewFile)
         {
-            await writer.WriteLineAsync("run_id,dbms,provider,scenario,rows,time_ms,cpu_ms,ram_mb,tps,read_ops,create_ops,update_ops,delete_ops");
+            await writer.WriteLineAsync("run_id,dbms,provider,scenario,rows,time_ms,cpu_ms,ram_mb,peak_ram_mb,tps,read_ops,create_ops,update_ops,delete_ops,gc_gen0,gc_gen1,gc_gen2");
         }
 
         var line = string.Join(",",
@@ -174,11 +182,16 @@ public class BenchmarkRunner
             result.TimeMs.ToString("F2", CultureInfo.InvariantCulture),
             result.CpuMs.ToString("F2", CultureInfo.InvariantCulture),
             result.RamMb.ToString("F2", CultureInfo.InvariantCulture),
+            result.RamMb.ToString("F2", CultureInfo.InvariantCulture),
+            result.PeakRamMb.ToString("F2", CultureInfo.InvariantCulture),
             result.Tps.ToString("F2", CultureInfo.InvariantCulture),
             result.ReadOps.ToString(CultureInfo.InvariantCulture),
             result.CreateOps.ToString(CultureInfo.InvariantCulture),
             result.UpdateOps.ToString(CultureInfo.InvariantCulture),
-            result.DeleteOps.ToString(CultureInfo.InvariantCulture));
+            result.DeleteOps.ToString(CultureInfo.InvariantCulture),
+            result.Gen0Collections.ToString(CultureInfo.InvariantCulture),
+            result.Gen1Collections.ToString(CultureInfo.InvariantCulture),
+            result.Gen2Collections.ToString(CultureInfo.InvariantCulture));
 
         await writer.WriteLineAsync(line);
     }
@@ -218,4 +231,8 @@ public sealed record BenchmarkResult(
     int ReadOps,
     int CreateOps,
     int UpdateOps,
-    int DeleteOps);
+    int DeleteOps,
+    double PeakRamMb,
+    int Gen0Collections,
+    int Gen1Collections,
+    int Gen2Collections);

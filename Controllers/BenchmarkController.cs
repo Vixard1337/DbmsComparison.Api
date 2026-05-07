@@ -45,11 +45,15 @@ public class BenchmarkController(IConfiguration configuration, BenchmarkRunner r
             result.TimeMs,
             result.CpuMs,
             result.RamMb,
+            result.PeakRamMb,
             result.Tps,
             result.ReadOps,
             result.CreateOps,
             result.UpdateOps,
-            result.DeleteOps
+            result.DeleteOps,
+            result.Gen0Collections,
+            result.Gen1Collections,
+            result.Gen2Collections
         });
     }
 
