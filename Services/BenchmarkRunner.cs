@@ -15,6 +15,9 @@ public class BenchmarkRunner
         var process = Process.GetCurrentProcess();
         var cpuStart = process.TotalProcessorTime;
         var memStart = process.WorkingSet64;
+        var gen0Start = GC.CollectionCount(0);
+        var gen1Start = GC.CollectionCount(1);
+        var gen2Start = GC.CollectionCount(2);
         var stopwatch = Stopwatch.StartNew();
 
         var users = Enumerable.Range(1, totalCount)
@@ -129,9 +132,9 @@ public class BenchmarkRunner
         var ramMb = Math.Max(0, process.WorkingSet64 - memStart) / 1024d / 1024d;
         var timeMs = stopwatch.Elapsed.TotalMilliseconds;
         var maxRamMb = Math.Max(memStart, process.PeakWorkingSet64) / 1024d / 1024d;
-        var gen0Collections = GC.CollectionCount(0);
-        var gen1Collections = GC.CollectionCount(1);
-        var gen2Collections = GC.CollectionCount(2);
+        var gen0Collections = GC.CollectionCount(0) - gen0Start;
+        var gen1Collections = GC.CollectionCount(1) - gen1Start;
+        var gen2Collections = GC.CollectionCount(2) - gen2Start;
         var readOps = readUsers.Count + readProducts.Count + readOrders.Count;
         var createOps = users.Count + products.Count + orders.Sum(o => o.OrderItems.Count);
         var updateOps = users.Count + products.Count + orders.Count;
@@ -181,7 +184,6 @@ public class BenchmarkRunner
             result.RowCount.ToString(CultureInfo.InvariantCulture),
             result.TimeMs.ToString("F2", CultureInfo.InvariantCulture),
             result.CpuMs.ToString("F2", CultureInfo.InvariantCulture),
-            result.RamMb.ToString("F2", CultureInfo.InvariantCulture),
             result.RamMb.ToString("F2", CultureInfo.InvariantCulture),
             result.PeakRamMb.ToString("F2", CultureInfo.InvariantCulture),
             result.Tps.ToString("F2", CultureInfo.InvariantCulture),

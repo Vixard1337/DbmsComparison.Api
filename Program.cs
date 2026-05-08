@@ -13,6 +13,7 @@ builder.Services.AddOpenApiDocument();
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddScoped<BenchmarkRunner>();
 builder.Services.AddScoped<BenchmarkBatchRunner>();
+builder.Services.AddScoped<ImplementationCostReportService>();
 
 var defaultProviderName = builder.Configuration["Database:DefaultProvider"];
 if (!DbContextOptionsFactory.TryParse(defaultProviderName, out var defaultProvider))

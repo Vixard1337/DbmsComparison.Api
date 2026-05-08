@@ -7,7 +7,7 @@ namespace DbmsComparison.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DatabaseController(IConfiguration configuration, DataSeeder dataSeeder) : ControllerBase
+public class DatabaseController(IConfiguration configuration, DataSeeder dataSeeder, ImplementationCostReportService implementationCostReportService) : ControllerBase
 {
     [HttpGet("providers")]
     public IActionResult Providers()
@@ -136,5 +136,11 @@ public class DatabaseController(IConfiguration configuration, DataSeeder dataSee
             Locations = locations,
             Total = users + categories + products + productCategories + orders + orderItems + locations
         });
+    }
+
+    [HttpGet("implementation-cost")]
+    public IActionResult ImplementationCost()
+    {
+        return Ok(implementationCostReportService.BuildReport());
     }
 }
