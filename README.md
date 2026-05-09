@@ -66,6 +66,10 @@ Supported values for `db`:
 
 This endpoint returns provider info and whether the API can connect to the selected DBMS.
 
+Implementation cost summary endpoint:
+
+`GET /api/database/implementation-cost`
+
 ## Quick Start
 
 1. Start databases:
@@ -93,6 +97,8 @@ This endpoint returns provider info and whether the API can connect to the selec
 Run integration tests:
 
 `dotnet test`
+
+Ensure database containers are running (see Docker section). Integration tests skip connectivity assertions when a provider is unavailable.
 
 ## Swagger UI
 
@@ -172,7 +178,7 @@ Planned provider-specific migration layout:
 - `Migrations/MySql`
 - `Migrations/Sqlite`
 
-## Planned Data Model (Unified Across DBMS)
+## Data Model (Unified Across DBMS)
 
 Main entities:
 
@@ -213,14 +219,29 @@ Model requirements include:
 
 ## Metrics
 
+Benchmark metrics captured per run:
+
 - `time_ms`
 - `tps`
-- `cpu`
-- `ram`
+- `cpu_ms`
+- `ram_mb`
+- `peak_ram_mb`
+- `read_ops`
+- `create_ops`
+- `update_ops`
+- `delete_ops`
+- `gc_gen0`, `gc_gen1`, `gc_gen2`
 
 Results format (CSV):
 
-`run_id,dbms,scenario,time_ms,cpu,ram,tps`
+`run_id,dbms,provider,scenario,rows,time_ms,cpu_ms,ram_mb,peak_ram_mb,tps,read_ops,create_ops,update_ops,delete_ops,gc_gen0,gc_gen1,gc_gen2`
+
+Implementation cost metrics (per provider):
+
+- configured connection string name
+- JSON column type
+- spatial column type / WKT fallback
+- migration count
 
 Each run is stored in:
 
@@ -242,7 +263,7 @@ Run analysis with plots:
 
 ## Repository Status
 
-Initial project setup. Full multi-database implementation, migrations, benchmarking, and analysis modules are in progress.
+Multi-database implementation, migrations, benchmarking, and analysis modules are included.
 
 ## License
 
