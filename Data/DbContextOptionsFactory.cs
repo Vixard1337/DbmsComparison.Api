@@ -16,7 +16,7 @@ public static class DbContextOptionsFactory
                 break;
             case DbmsProvider.MySql:
                 var mySqlConnection = configuration.GetConnectionString("MySql");
-                optionsBuilder.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection), mySql => mySql.UseNetTopologySuite());
+                optionsBuilder.UseMySql(mySqlConnection, new MySqlServerVersion(new Version(8, 0, 0)), mySql => mySql.UseNetTopologySuite());
                 break;
             case DbmsProvider.Sqlite:
                 optionsBuilder.UseSqlite(configuration.GetConnectionString("Sqlite"));
