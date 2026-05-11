@@ -118,6 +118,14 @@ Batch runner for S1/S2/S3 with repetitions:
 
 `POST /api/benchmark/run-all?db=sqlserver&repetitions=5`
 
+Report summary endpoint:
+
+`GET /api/report/summary`
+
+Report plots endpoint:
+
+`GET /api/report/plots`
+
 Benchmark v1 runs CRUD for `Users`, `Products`, and `Orders` (with `OrderItems`).
 
 Basic `Users` CRUD endpoints are available:

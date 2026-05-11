@@ -14,6 +14,8 @@ builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddScoped<BenchmarkRunner>();
 builder.Services.AddScoped<BenchmarkBatchRunner>();
 builder.Services.AddScoped<ImplementationCostReportService>();
+builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<ReportService>();
 
 var defaultProviderName = builder.Configuration["Database:DefaultProvider"];
 if (!DbContextOptionsFactory.TryParse(defaultProviderName, out var defaultProvider))
@@ -29,6 +31,25 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    if (string.Equals(Environment.GetEnvironmentVariable("DBMSCOMPARISON_DOCKER"), "true", StringComparison.OrdinalIgnoreCase))
+    {
+        using var process = new System.Diagnostics.Process
+        {
+            StartInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "docker",
+                Arguments = "compose up -d",
+                WorkingDirectory = app.Environment.ContentRootPath,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        process.Start();
+    }
+
     app.MapOpenApi();
     app.UseOpenApi();
     app.UseSwaggerUi();
