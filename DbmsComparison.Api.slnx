@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="DbmsComparison.Api.csproj" />
   <Project Path="DbmsComparison.Api.Tests\\DbmsComparison.Api.Tests.csproj" />
+  <Project Path="DbmsComparison.Api.Reporter\\DbmsComparison.Api.Reporter.csproj" />
 </Solution>
+

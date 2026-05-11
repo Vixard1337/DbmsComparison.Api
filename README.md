@@ -251,15 +251,11 @@ Each run is stored in:
 
 Analyze benchmark results and generate summary statistics + plots:
 
-`python analysis/analyze_results.py --input results/benchmark-results.csv`
-
-Install analysis dependencies:
-
-`pip install -r analysis/requirements.txt`
+`dotnet run --project DbmsComparison.Api.Reporter -- --input results/benchmark-results.csv`
 
 Run analysis with plots:
 
-`python analysis/analyze_results.py --input results/benchmark-results.csv --plots analysis/plots`
+`dotnet run --project DbmsComparison.Api.Reporter -- --input results/benchmark-results.csv --plots analysis/plots`
 
 ## Repository Status
 
