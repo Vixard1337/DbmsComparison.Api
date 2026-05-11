@@ -93,10 +93,12 @@ public class BenchmarkRunner
             .Take(totalCount)
             .ToListAsync(cancellationToken);
 
+        var minCreatedAt = orders.Min(o => o.CreatedAt);
+
         var readOrders = await context.Orders
             .AsNoTracking()
             .Include(x => x.OrderItems)
-            .Where(x => x.CreatedAt >= orders.Min(o => o.CreatedAt))
+            .Where(x => x.CreatedAt >= minCreatedAt)
             .OrderBy(x => x.Id)
             .Take(ordersToCreate)
             .ToListAsync(cancellationToken);
