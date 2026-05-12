@@ -126,6 +126,10 @@ Report plots endpoint:
 
 `GET /api/report/plots`
 
+Report PDF endpoint:
+
+`GET /api/report/pdf`
+
 Benchmark v1 runs CRUD for `Users`, `Products`, and `Orders` (with `OrderItems`).
 
 Basic `Users` CRUD endpoints are available:

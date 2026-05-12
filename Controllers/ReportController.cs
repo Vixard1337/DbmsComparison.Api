@@ -18,4 +18,11 @@ public class ReportController(ReportService reportService) : ControllerBase
     {
         return Ok(new { Files = reportService.GeneratePlots() });
     }
+
+    [HttpGet("pdf")]
+    public IActionResult Pdf()
+    {
+        var path = reportService.GeneratePdfReport();
+        return Ok(new { File = path });
+    }
 }

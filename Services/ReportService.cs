@@ -1,5 +1,7 @@
 using System.Globalization;
 using ScottPlot;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 
 namespace DbmsComparison.Api.Services;
 
@@ -29,6 +31,67 @@ public class ReportService(ImplementationCostReportService implementationCostRep
         var plotsDirectory = Path.Combine(resultsDirectory, "plots");
         var plotFiles = PlotWriter.Write(plotsDirectory, rows);
         return plotFiles;
+    }
+
+    public string GeneratePdfReport()
+    {
+        var summary = BuildSummary();
+        var implementationReport = implementationCostReportService.BuildReport();
+        var outputPath = Path.Combine(summary.ResultsDirectory, "report-summary.pdf");
+
+        using var document = new PdfDocument();
+        var titleFont = new XFont("Arial", 14, XFontStyle.Bold);
+        var headerFont = new XFont("Arial", 11, XFontStyle.Bold);
+        var textFont = new XFont("Arial", 10, XFontStyle.Regular);
+        const double margin = 30;
+        const double lineHeight = 14;
+
+        PdfPage page = document.AddPage();
+        XGraphics graphics = XGraphics.FromPdfPage(page);
+        double y = margin;
+
+        void EnsureSpace()
+        {
+            if (y <= page.Height - margin - lineHeight)
+            {
+                return;
+            }
+
+            page = document.AddPage();
+            graphics = XGraphics.FromPdfPage(page);
+            y = margin;
+        }
+
+        void WriteLine(string text, XFont font)
+        {
+            EnsureSpace();
+            graphics.DrawString(text, font, XBrushes.Black, new XRect(margin, y, page.Width - margin * 2, lineHeight), XStringFormats.TopLeft);
+            y += lineHeight;
+        }
+
+        WriteLine("DbmsComparison report summary", titleFont);
+        y += lineHeight / 2;
+        WriteLine("Usage cost summary (mean values)", headerFont);
+
+        foreach (var row in summary.Summaries)
+        {
+            WriteLine(
+                $"{row.Dbms} {row.Scenario} | time {row.TimeMean:F2} ms | tps {row.TpsMean:F2} | cpu {row.CpuMean:F2} ms | ram {row.RamMean:F2} MB | peak {row.PeakRamMean:F2} MB",
+                textFont);
+        }
+
+        y += lineHeight / 2;
+        WriteLine("Implementation cost summary", headerFont);
+
+        foreach (var provider in implementationReport.Providers)
+        {
+            WriteLine(
+                $"{provider.Key} | conn {provider.ConnectionStringName} | json {provider.JsonColumnType} | spatial {provider.SpatialColumnType} ({provider.SpatialSupportMode}) | migrations {provider.MigrationCount}",
+                textFont);
+        }
+
+        document.Save(outputPath);
+        return outputPath;
     }
 
     private string GetResultsDirectory()
