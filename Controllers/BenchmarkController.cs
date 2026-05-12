@@ -9,6 +9,8 @@ namespace DbmsComparison.Api.Controllers;
 [Route("api/[controller]")]
 public class BenchmarkController(IConfiguration configuration, BenchmarkRunner runner, BenchmarkBatchRunner batchRunner) : ControllerBase
 {
+    private static readonly string[] SupportedProviders = ["sqlserver", "postgres", "mysql", "sqlite"];
+
     [HttpPost("run")]
     public async Task<IActionResult> Run([FromQuery] string db = "sqlserver", [FromQuery] string scenario = "S1", [FromQuery] int? rows = null, CancellationToken cancellationToken = default)
     {
@@ -103,5 +105,59 @@ public class BenchmarkController(IConfiguration configuration, BenchmarkRunner r
                     })
                 })
         });
+    }
+
+    [HttpPost("run-all-providers")]
+    public async Task<IActionResult> RunAllProviders([FromQuery] int repetitions = 5, CancellationToken cancellationToken = default)
+    {
+        if (repetitions <= 0)
+        {
+            return BadRequest(new { message = "Repetitions must be greater than 0." });
+        }
+
+        var results = new List<object>();
+
+        foreach (var db in SupportedProviders)
+        {
+            if (!DbContextOptionsFactory.TryParse(db, out var provider))
+            {
+                continue;
+            }
+
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            DbContextOptionsFactory.ConfigureProvider(optionsBuilder, configuration, provider);
+
+            await using var context = new AppDbContext(optionsBuilder.Options);
+            if (!await context.Database.CanConnectAsync(cancellationToken))
+            {
+                results.Add(new { db, provider = context.Database.ProviderName, message = "Cannot connect to database." });
+                continue;
+            }
+
+            var runs = await batchRunner.RunAsync(context, db, context.Database.ProviderName ?? "unknown", repetitions, cancellationToken);
+            results.Add(new
+            {
+                db,
+                provider = context.Database.ProviderName,
+                repetitions,
+                scenarios = runs
+                    .GroupBy(x => x.Scenario)
+                    .OrderBy(x => x.Key)
+                    .Select(x => new
+                    {
+                        Scenario = x.Key.ToString(),
+                        Runs = x.Select(r => new
+                        {
+                            r.Iteration,
+                            r.RunId,
+                            r.RowCount,
+                            r.TimeMs,
+                            r.Tps
+                        })
+                    })
+            });
+        }
+
+        return Ok(new { repetitions, results });
     }
 }

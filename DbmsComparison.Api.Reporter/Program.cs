@@ -294,13 +294,13 @@ static class PlotWriter
                     .ToArray();
 
                 var plot = new Plot();
-                var bar = plot.Add.Bar(means);
-                bar.PositionOffset = 0;
+                var positions = Enumerable.Range(0, means.Length).Select(x => (double)x).ToArray();
+                plot.Add.Bars(positions, means);
 
                 plot.Title($"{metric.Name} mean - {scenario}");
                 plot.YLabel(metric.Name);
                 plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(
-                    dbmsValues.Select((_, i) => (double)i).ToArray(),
+                    positions,
                     dbmsValues.ToArray());
                 plot.Axes.Bottom.MajorTickStyle.Length = 0;
 
