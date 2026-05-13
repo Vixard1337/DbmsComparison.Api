@@ -15,6 +15,7 @@ builder.Services.AddScoped<BenchmarkRunner>();
 builder.Services.AddScoped<BenchmarkBatchRunner>();
 builder.Services.AddScoped<ImplementationCostReportService>();
 builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<DiagramService>();
 
 var defaultProviderName = builder.Configuration["Database:DefaultProvider"];
 if (!DbContextOptionsFactory.TryParse(defaultProviderName, out var defaultProvider))

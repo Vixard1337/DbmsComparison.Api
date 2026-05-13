@@ -130,6 +130,14 @@ Report PDF endpoint:
 
 `GET /api/report/pdf`
 
+Report file download endpoint:
+
+`GET /api/report/files/{fileName}`
+
+Generate diagrams (Mermaid):
+
+`POST /api/report/diagrams`
+
 Benchmark v1 runs CRUD for `Users`, `Products`, and `Orders` (with `OrderItems`).
 
 Basic `Users` CRUD endpoints are available:
