@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO.Compression;
 using ScottPlot;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
@@ -92,6 +93,20 @@ public class ReportService(ImplementationCostReportService implementationCostRep
 
         document.Save(outputPath);
         return outputPath;
+    }
+
+    public string GenerateResultsArchive()
+    {
+        var resultsDirectory = GetResultsDirectory();
+        var archivePath = Path.Combine(resultsDirectory, "results.zip");
+
+        if (File.Exists(archivePath))
+        {
+            File.Delete(archivePath);
+        }
+
+        ZipFile.CreateFromDirectory(resultsDirectory, archivePath);
+        return archivePath;
     }
 
     private string GetResultsDirectory()

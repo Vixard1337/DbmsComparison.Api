@@ -23,7 +23,14 @@ public class ReportController(ReportService reportService, DiagramService diagra
     public IActionResult Pdf()
     {
         var path = reportService.GeneratePdfReport();
-        return Ok(new { File = path });
+        return PhysicalFile(path, "application/pdf", Path.GetFileName(path));
+    }
+
+    [HttpGet("archive")]
+    public IActionResult Archive()
+    {
+        var path = reportService.GenerateResultsArchive();
+        return PhysicalFile(path, "application/zip", Path.GetFileName(path));
     }
 
     [HttpGet("files/{fileName}")]

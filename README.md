@@ -130,6 +130,10 @@ Report PDF endpoint:
 
 `GET /api/report/pdf`
 
+Report archive (ZIP) endpoint:
+
+`GET /api/report/archive`
+
 Report file download endpoint:
 
 `GET /api/report/files/{fileName}`
