@@ -138,9 +138,15 @@ Report file download endpoint:
 
 `GET /api/report/files/{fileName}`
 
+Combined benchmark results:
+
+`results/benchmark-results-all.csv`
+
 Generate diagrams (Mermaid):
 
 `POST /api/report/diagrams`
+
+If Mermaid CLI is installed (`mmdc` on PATH), PNG files are generated alongside `.mmd`.
 
 Benchmark v1 runs CRUD for `Users`, `Products`, and `Orders` (with `OrderItems`).
 

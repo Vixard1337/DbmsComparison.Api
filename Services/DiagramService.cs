@@ -10,11 +10,16 @@ public class DiagramService
 
         var architecturePath = Path.Combine(diagramsDirectory, "architecture.mmd");
         var erdPath = Path.Combine(diagramsDirectory, "erd.mmd");
+        var architectureImage = Path.Combine(diagramsDirectory, "architecture.png");
+        var erdImage = Path.Combine(diagramsDirectory, "erd.png");
 
         File.WriteAllText(architecturePath, GetArchitectureDiagram());
         File.WriteAllText(erdPath, GetErdDiagram());
 
-        return [architecturePath, erdPath];
+        TryRenderMermaid(diagramsDirectory, architecturePath, architectureImage);
+        TryRenderMermaid(diagramsDirectory, erdPath, erdImage);
+
+        return [architecturePath, erdPath, architectureImage, erdImage];
     }
 
     private static string GetArchitectureDiagram()
@@ -46,5 +51,31 @@ erDiagram
     CATEGORY ||--o{ PRODUCT_CATEGORY : tags
     LOCATION
 """.Trim();
+    }
+
+    private static void TryRenderMermaid(string workingDirectory, string inputPath, string outputPath)
+    {
+        var process = new System.Diagnostics.Process
+        {
+            StartInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "mmdc",
+                Arguments = $"-i \"{inputPath}\" -o \"{outputPath}\"",
+                WorkingDirectory = workingDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        try
+        {
+            process.Start();
+            process.WaitForExit(10000);
+        }
+        catch
+        {
+        }
     }
 }

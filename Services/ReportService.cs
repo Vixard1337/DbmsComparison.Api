@@ -11,10 +11,12 @@ public class ReportService(ImplementationCostReportService implementationCostRep
     public ReportSummary BuildSummary()
     {
         var resultsDirectory = GetResultsDirectory();
-        var rows = LoadRows(resultsDirectory);
+        var resultFiles = GetResultFiles(resultsDirectory);
+        var rows = LoadRows(resultFiles);
         var summaries = UsageSummaryRow.Build(rows);
         var usageComparisonPath = Path.Combine(resultsDirectory, "usage-comparison.csv");
         var summaryPath = Path.Combine(resultsDirectory, "usage-summary.csv");
+        var combinedPath = GenerateCombinedResults(resultsDirectory, resultFiles);
         UsageSummaryRow.Write(summaryPath, summaries);
         UsageSummaryRow.WriteComparison(usageComparisonPath, summaries);
 
@@ -22,13 +24,13 @@ public class ReportService(ImplementationCostReportService implementationCostRep
         var implementationPath = Path.Combine(resultsDirectory, "implementation-comparison.csv");
         ImplementationComparisonRow.Write(implementationPath, implementationReport);
 
-        return new ReportSummary(resultsDirectory, summaryPath, usageComparisonPath, implementationPath, summaries);
+        return new ReportSummary(resultsDirectory, summaryPath, usageComparisonPath, implementationPath, combinedPath, summaries);
     }
 
     public IReadOnlyList<string> GeneratePlots()
     {
         var resultsDirectory = GetResultsDirectory();
-        var rows = LoadRows(resultsDirectory);
+        var rows = LoadRows(GetResultFiles(resultsDirectory));
         var plotsDirectory = Path.Combine(resultsDirectory, "plots");
         var plotFiles = PlotWriter.Write(plotsDirectory, rows);
         return plotFiles;
@@ -116,14 +118,15 @@ public class ReportService(ImplementationCostReportService implementationCostRep
         return directory;
     }
 
-    private static List<ResultRow> LoadRows(string resultsDirectory)
+    private static List<string> GetResultFiles(string resultsDirectory)
     {
-        if (!Directory.Exists(resultsDirectory))
-        {
-            return [];
-        }
+        return Directory.Exists(resultsDirectory)
+            ? Directory.EnumerateFiles(resultsDirectory, "benchmark-results-*.csv").ToList()
+            : [];
+    }
 
-        var files = Directory.EnumerateFiles(resultsDirectory, "benchmark-results-*.csv").ToList();
+    private static List<ResultRow> LoadRows(IReadOnlyCollection<string> files)
+    {
         var rows = new List<ResultRow>();
         foreach (var file in files)
         {
@@ -132,6 +135,47 @@ public class ReportService(ImplementationCostReportService implementationCostRep
 
         return rows;
     }
+
+    private static string? GenerateCombinedResults(string resultsDirectory, IReadOnlyCollection<string> files)
+    {
+        if (files.Count == 0)
+        {
+            return null;
+        }
+
+        var outputPath = Path.Combine(resultsDirectory, "benchmark-results-all.csv");
+        var wroteHeader = false;
+
+        using var writer = new StreamWriter(outputPath, false);
+        foreach (var file in files)
+        {
+            var lines = File.ReadAllLines(file);
+            if (lines.Length == 0)
+            {
+                continue;
+            }
+
+            var startIndex = 0;
+            if (wroteHeader)
+            {
+                startIndex = 1;
+            }
+            else
+            {
+                wroteHeader = true;
+            }
+
+            for (var i = startIndex; i < lines.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(lines[i]))
+                {
+                    writer.WriteLine(lines[i]);
+                }
+            }
+        }
+
+        return outputPath;
+    }
 }
 
 public sealed record ReportSummary(
@@ -139,6 +183,7 @@ public sealed record ReportSummary(
     string SummaryPath,
     string UsageComparisonPath,
     string ImplementationComparisonPath,
+    string? CombinedResultsPath,
     IReadOnlyList<UsageSummaryRow> Summaries);
 
 public sealed record ResultRow(
